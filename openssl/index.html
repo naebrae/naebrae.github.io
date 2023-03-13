@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta name="description" content="OpenSSL Help Sheet">
+<meta name="keywords" content="HTML, CSS, JavaScript, OpenSSL">
+<meta name="author" content="Andrew Milne">
+
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>OpenSSL Help Sheet</title>
+
+<style type="text/css">
+textarea {
+  position: absolute;
+  left: -100%;
+}
+
+button {
+  transition-duration: 0.4s;
+  background-color: white;
+  color: black;
+  border: 1px solid #4CAF50; /* Green */
+  border-radius: 8px;
+}
+button:active {
+  transform: translateY(6px);
+}
+button:hover {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+#edit_c span {
+  font-style: italic;
+  font-weight: bold;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  outline: 1px dotted;
+  padding: 1px 3px;
+  color: #0f7000; /* Green */
+  cursor: pointer;
+}
+
+#cn,#o,#l,#st,#c,#test span {
+  font-style: italic;
+  font-weight: bold;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  outline: 1px dotted;
+  padding: 1px 3px;
+  color: #0f7000; /* Green */
+  cursor: pointer;
+}
+#cn,#o,#l,#st,#c,#test input {
+  font-style: normal;
+  font-weight: normal;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  outline: 1px dotted;
+  padding: 1px 3px;
+  border: 0px;
+}
+
+.output {
+  width: 60%;
+  margin: auto;
+}
+
+pre {
+   font-family: "Courier New", Courier, monospace;
+   font-size: 12px;
+   font-style: normal;
+   font-variant: normal;
+   font-weight: normal;
+   background-color: #FFFFFF;
+}
+
+div.code {
+   position: relative;
+   overflow-x: auto;
+
+   margin-left: 20px;
+   margin-right: 20px;
+   margin-bottom: 20px;
+   width: 700px;
+   padding-left: 20px;
+   text-align: left;
+   vertical-align: middle;
+
+   box-shadow: 10px 10px 5px #888888;
+   border:1px solid #888888;
+
+   -moz-border-radius-bottomleft: 14px;
+   -webkit-border-bottom-left-radius: 14px;
+   border-bottom-left-radius: 14px;
+
+   -moz-border-radius-bottomright: 14px;
+   -webkit-border-bottom-right-radius: 14px;
+   border-bottom-right-radius: 14px;
+
+   -moz-border-radius-topright: 14px;
+   -webkit-border-top-right-radius: 14px;
+   border-top-right-radius: 14px;
+
+   -moz-border-radius-topleft: 14px;
+   -webkit-border-top-left-radius: 14px;
+   border-top-left-radius: 14px;
+
+}
+
+div.code_sticky {
+   position: -webkit-sticky;
+   position: sticky;
+   top: 0;
+   overflow-x: auto;
+   background-color: white;
+
+   margin-left: 20px;
+   margin-right: 20px;
+   margin-bottom: 20px;
+   width: 700px;
+   padding-left: 20px;
+   text-align: left;
+   vertical-align: middle;
+
+   box-shadow: 10px 10px 5px #888888;
+   border:1px solid #888888;
+
+   -moz-border-radius-bottomleft: 14px;
+   -webkit-border-bottom-left-radius: 14px;
+   border-bottom-left-radius: 14px;
+
+   -moz-border-radius-bottomright: 14px;
+   -webkit-border-bottom-right-radius: 14px;
+   border-bottom-right-radius: 14px;
+
+   -moz-border-radius-topright: 14px;
+   -webkit-border-top-right-radius: 14px;
+   border-top-right-radius: 14px;
+
+   -moz-border-radius-topleft: 14px;
+   -webkit-border-top-left-radius: 14px;
+   border-top-left-radius: 14px;
+
+}
+
+pre + button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="output">
+<br>
+Create CSR
+<div class="code_sticky">
+<pre id="pre000">
+openssl req -new -newkey rsa:2048 -nodes \
+  -out <span class="file">localhost</span>.csr \
+  -keyout <span class="file">localhost</span>.key \
+  -subj "/C=<span id="c">AU</span>/ST=<span id="st">Western Australia</span>/L=<span id="l">Location</span>/O=<span id="o">Organisation</span>/CN=<span id="cn">localhost</span>"
+</pre>
+<button onclick="clipper('pre000')">Copy</button>
+</div>
+
+<details>
+<summary>Create ECC CSR</summary>
+<div class="code">
+<pre id="pre100">
+openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+  -out <span class="file">localhost</span>.csr \
+  -keyout <span class="file">localhost</span>.key \
+  -subj "/C=<span class="c">AU</span>/ST=<span class="st">Western Australia</span>/L=<span class="l">Location</span>/O=<span class="o">Organisation</span>/CN=<span class="cn">localhost</span>"
+</pre>
+<button onclick="clipper('pre100')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create CSR with SAN</summary>
+<div class="code">
+<pre id="pre001">
+openssl req -new -newkey rsa:2048 -nodes \
+  -out <span class="file">localhost</span>.csr \
+  -keyout <span class="file">localhost</span>.key \
+  -subj "/C=<span class="c">AU</span>/ST=<span class="st">Western Australia</span>/L=<span class="l">Location</span>/O=<span class="o">Organisation</span>/CN=<span class="cn">localhost</span>"
+  -reqexts req_ext \
+  -config <(cat \
+  <(printf "[ req ]\n") \
+  <(printf "distinguished_name=req\n") \
+  <(printf "[ req_ext ]\n") \
+  <(printf "subjectAltName=<span class="san1">DNS:localhost,IP:127.0.0.1</span>\n") \
+  )
+</pre>
+<button onclick="clipper('pre001')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create Windows CSR with SAN</summary>
+<div class="code">
+<pre id="pre002">
+openssl req -newkey rsa:2048 -nodes \
+  -out "<span class="file">localhost</span>.csr" \
+  -keyout "<span class="file">localhost</span>.key" \
+  -subj "/C=<span class="c">AU</span>/ST=<span class="st">Western Australia</span>/L=<span class="l">Location</span>/O=<span class="o">Organisation</span>/CN=<span class="cn">localhost</span>" \
+  -reqexts req_ext \
+  -config <(cat \
+  <(printf "oid_section=new_oids\n") \
+  <(printf "[ new_oids ]\n") \
+  <(printf "certificateTemplate=1.3.6.1.4.1.311.20.2\n") \
+  <(printf "[ req ]\n") \
+  <(printf "distinguished_name=req\n") \
+  <(printf "[ req_ext ]\n") \
+  <(printf "certificateTemplate=ASN1:BMP:SHA2-SSL-WebRequest\n") \
+  <(printf "subjectAltName=@alt_name\n") \
+  <(printf "[ alt_name ]\n") \
+  <span class="san3"><(printf "DNS.1=localhost\n") \<br>  <(printf "IP.1=127.0.0.1\n") \</span>
+  )
+</pre>
+<button onclick="clipper('pre002')">Copy</button>
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Create Self-Signed V1 Certificate from CSR</summary>
+<div class="code">
+<pre id="pre003">
+openssl x509 -req -sha256 -days 3652 \
+  -in <span class="file">localhost</span>.csr \
+  -signkey <span class="file">localhost</span>.key \
+  -out <span class="file">localhost</span>.crt
+</pre>
+<button onclick="clipper('pre003')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create Self-Signed V3 Certificate from CSR</summary>
+<div class="code">
+<pre id="pre004">
+openssl x509 -req -sha256 -days 3652 \
+  -in <span class="file">localhost</span>.csr \
+  -signkey <span class="file">localhost</span>.key \
+  -out <span class="file">localhost</span>.crt \
+  -extensions exts \
+  -extfile <(cat \
+  <(printf "[ exts ]\n") \
+  <(printf "subjectKeyIdentifier=hash\n") \
+  <(printf "authorityKeyIdentifier=keyid:always,issuer\n") \
+  <(printf "subjectAltName=<span class="san1">DNS:localhost,IP:127.0.0.1</span>\n") \
+  <(printf "basicConstraints=critical,CA:true\n") \
+  )
+</pre>
+<button onclick="clipper('pre004')">Copy</button>
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Create Self-Signed Certificate (10 years)</summary>
+<div class="code">
+<pre id="pre005">
+openssl req -new -x509 -newkey rsa:2048 -sha256 -nodes -days 3652 \
+  -out <span class="file">localhost</span>.crt \
+  -keyout <span class="file">localhost</span>.key \
+  -subj "/C=<span class="c">AU</span>/ST=<span class="st">Western Australia</span>/L=<span class="l">Location</span>/O=<span class="o">Organisation</span>/CN=<span class="cn">localhost</span>"
+</pre>
+<button onclick="clipper('pre005')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create Self-Signed ECC Certificate (100 years)</summary>
+<div class="code">
+<pre id="pre105">
+openssl req -new -x509 -sha256 -nodes -days 36524 \
+  -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 \
+  -out <span class="file">localhost</span>.crt \
+  -keyout <span class="file">localhost</span>.key \
+  -subj "/C=<span class="c">AU</span>/ST=<span class="st">Western Australia</span>/L=<span class="l">Location</span>/O=<span class="o">Organisation</span>/CN=<span class="cn">localhost</span>"
+</pre>
+<button onclick="clipper('pre105')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create Self-Signed Certificate with SAN method 1</summary>
+<div class="code">
+<pre id="pre006">
+openssl req -new -x509 -newkey rsa:2048 -sha256 -nodes -days 3652 \
+  -out <span class="file">localhost</span>.crt \
+  -keyout <span class="file">localhost</span>.key \
+  -subj "/C=<span class="c">AU</span>/ST=<span class="st">Western Australia</span>/L=<span class="l">Location</span>/O=<span class="o">Organisation</span>/CN=<span class="cn">localhost</span>" \
+  -extensions x509_ext \
+  -config <(cat \
+  <(printf "[ req ]\n") \
+  <(printf "distinguished_name=req\n") \
+  <(printf "[ x509_ext ]\n") \
+  <(printf "subjectKeyIdentifier=hash\n") \
+  <(printf "authorityKeyIdentifier=keyid:always,issuer\n") \
+  <(printf "subjectAltName=<span class="san1">DNS:localhost,IP:127.0.0.1</span>\n") \
+  <(printf "basicConstraints=critical,CA:true\n") \
+  )
+</pre>
+<button onclick="clipper('pre006')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create Self-Signed Certificate with SAN method 2</summary>
+<div class="code">
+<pre id="pre007">
+openssl req -new -x509 -newkey rsa:2048 -sha256 -nodes -days 3652 \
+  -out <span class="file">localhost</span>.crt \
+  -keyout <span class="file">localhost</span>.key \
+  -subj "/C=<span class="c">AU</span>/ST=<span class="st">Western Australia</span>/L=<span class="l">Location</span>/O=<span class="o">Organisation</span>/CN=<span class="cn">localhost</span>" \
+  -config <(cat \
+  <(printf " \
+  [ req ]\n \
+  distinguished_name = req\n \
+  x509_extensions = x509_ext\n \
+  \n \
+  [ x509_ext ]\n \
+  subjectKeyIdentifier = hash\n \
+  authorityKeyIdentifier = keyid:always,issuer\n \
+  subjectAltName = @alt_name\n \
+  basicConstraints = critical,CA:true\n \
+  \n \
+  [ alt_name ]\n \
+  <span class="san2">DNS.1 = localhost\n \<br>  IP.1 = 127.0.0.1\n \</span>
+  "))
+</pre>
+<button onclick="clipper('pre007')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create Self-Signed Certificate with SAN method 3</summary>
+<div class="code">
+<pre id="pre107">
+openssl req -new -x509 -newkey rsa:2048 -sha256 -nodes -days 3652 \
+  -out <span class="file">localhost</span>.crt \
+  -keyout <span class="file">localhost</span>.key \
+  -subj "/C=<span class="c">AU</span>/ST=<span class="st">Western Australia</span>/L=<span class="l">Location</span>/O=<span class="o">Organisation</span>/CN=<span class="cn">localhost</span>" \
+  -config <(cat &lt;&lt;EOF
+  [ req ]
+  distinguished_name     = req
+  x509_extensions        = x509_ext
+
+  [ x509_ext ]
+  subjectKeyIdentifier   = hash
+  authorityKeyIdentifier = keyid:always,issuer
+  subjectAltName         = <span class="san1">DNS:localhost,IP:127.0.0.1</span>
+  basicConstraints       = critical,CA:true
+EOF
+  )
+</pre>
+<button onclick="clipper('pre107')">Copy</button>
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Create RSA private key, PKCS#1 format</summary>
+<div class="code">
+<pre id="pre217">
+openssl genrsa -out <span class="file">localhost</span>.key 2048
+</pre>
+<button onclick="clipper('pre217')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create RSA private key, PKCS#8 format</summary>
+<div class="code">
+<pre id="pre207">
+openssl genpkey -out <span class="file">localhost</span>.key -algorithm RSA -pkeyopt rsa_keygen_bits:2048
+</pre>
+<button onclick="clipper('pre207')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create ECC private key, PKCS#1 format</summary>
+<div class="code">
+<pre id="pre227">
+openssl ecparam -name prime256v1 -genkey -noout -out <span class="file">localhost</span>.key
+</pre>
+<button onclick="clipper('pre227')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create ECC private key, PKCS#8 format</summary>
+<div class="code">
+<pre id="pre237">
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:prime256v1 -out <span class="file">localhost</span>.key
+</pre>
+<button onclick="clipper('pre237')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Convert <span class="file">localhost</span>.key from PKCS#8 to PKCS#1 format</summary>
+&nbsp; &nbsp; PKCS#8 -----BEGIN PRIVATE KEY-----
+<div class="code">
+<pre id="pre008">
+openssl rsa \
+  -in <span class="file">localhost</span>.key \
+  -out <span class="file">localhost</span>.pkcs1.key
+</pre>
+<button onclick="clipper('pre008')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Convert ECC <span class="file">localhost</span>.key from PKCS#8 to PKCS#1 format</summary>
+&nbsp; &nbsp; PKCS#8 -----BEGIN PRIVATE KEY-----
+<div class="code">
+<pre id="pre208">
+openssl ec \
+  -in <span class="file">localhost</span>.key \
+  -out <span class="file">localhost</span>.pkcs1.key
+</pre>
+<button onclick="clipper('pre208')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Convert <span class="file">localhost</span>.key from PKCS#1 to PKCS#8 format</summary>
+&nbsp; &nbsp; PKCS#1 -----BEGIN RSA PRIVATE KEY----- or -----BEGIN EC PRIVATE KEY-----
+<div class="code">
+<pre id="pre108">
+openssl pkcs8 -topk8 -nocrypt \
+  -in <span class="file">localhost</span>.pkcs1.key \
+  -out <span class="file">localhost</span>.key
+</pre>
+<button onclick="clipper('pre108')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Add password to <span class="file">localhost</span>.key</summary>
+<div class="code">
+<pre id="pre009">
+openssl rsa \
+  -in <span class="file">localhost</span>.key \
+  -out <span class="file">localhost</span>.pwd.key \
+  -aes256 -passout pass:<span class="pwd">changeit</span>
+echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre009')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Remove password from <span class="file">localhost</span>.key</summary>
+<div class="code">
+<pre id="pre010">
+openssl rsa \
+  -in <span class="file">localhost</span>.pwd.key \
+  -passin file:<span class="file">localhost</span>.pin \
+  -out <span class="file">localhost</span>.key
+</pre>
+<button onclick="clipper('pre010')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Verify <span class="file">localhost</span>.key matches <span class="file">localhost</span>.csr</summary>
+<div class="code">
+<pre id="pre110">
+openssl pkey -pubout -in <span class="file">localhost</span>.key | openssl sha256
+openssl req -pubkey -in <span class="file">localhost</span>.csr -noout | openssl sha256
+</pre>
+<button onclick="clipper('pre110')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Verify <span class="file">localhost</span>.key matches <span class="file">localhost</span>.crt</summary>
+<div class="code">
+<pre id="pre210">
+openssl pkey -pubout -in <span class="file">localhost</span>.key | openssl sha256
+openssl x509 -pubkey -in <span class="file">localhost</span>.crt -noout | openssl sha256
+</pre>
+<button onclick="clipper('pre210')">Copy</button>
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Create P7B from Self-Signed Certificate</summary>
+<div class="code">
+<pre id="pre111">
+openssl crl2pkcs7 -nocrl \
+  -certfile <span class="file">localhost</span>.crt \
+  -out <span class="file">localhost</span>.p7b
+</pre>
+<button onclick="clipper('pre111')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create PFX from Self-Signed Certificate</summary>
+<div class="code">
+<pre id="pre011">
+openssl pkcs12 -export \
+  -out <span class="file">localhost</span>.pfx \
+  -inkey <span class="file">localhost</span>.key \
+  -in <span class="file">localhost</span>.crt \
+  -certfile <span class="file">localhost</span>.crt \
+  -password pass:<span class="pwd">changeit</span>
+echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre011')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create Java KeyStore from Self-Signed Certificate</summary>
+<div class="code">
+<pre id="pre012">
+openssl pkcs12 -export \
+  -out <span class="file">localhost</span>.pfx \
+  -inkey <span class="file">localhost</span>.key \
+  -in <span class="file">localhost</span>.crt \
+  -certfile <span class="file">localhost</span>.crt \
+  -name <span class="file">localhost</span> \
+  -password pass:<span class="pwd">changeit</span>
+keytool -importkeystore \
+  -srckeystore <span class="file">localhost</span>.pfx -srcstoretype pkcs12 \
+  -srcalias <span class="file">localhost</span> -srcstorepass <span class="pwd">changeit</span> \
+  -destkeystore <span class="file">localhost</span>.jks -deststoretype JKS \
+  -destalias <span class="file">localhost</span> -storepass <span class="pwd">changeit</span>
+keytool -import -trustcacerts -alias <span class="file">localhost</span> -file <span class="file">localhost</span>.crt \
+  -keystore <span class="file">localhost</span>.jks -storepass <span class="pwd">changeit</span> -noprompt
+echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre012')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create enddate alias JCEKS from Self-Signed Certificate</summary>
+<div class="code">
+<pre id="pre013">
+ENDDATE=`date \
+  --date="$(openssl x509 -in <span class="file">localhost</span>.crt -enddate -noout | cut -d= -f 2)" \
+  --iso-8601`
+openssl pkcs12 -export \
+  -out <span class="file">localhost</span>.pfx \
+  -inkey <span class="file">localhost</span>.key \
+  -in <span class="file">localhost</span>.crt \
+  -certfile <span class="file">localhost</span>.crt \
+  -name <span class="file">localhost</span> \
+  -password pass:<span class="pwd">changeit</span>
+keytool -importkeystore \
+  -srckeystore <span class="file">localhost</span>.pfx -srcstoretype pkcs12 \
+  -destkeystore <span class="file">localhost</span>.jceks -deststoretype JCEKS \
+  -alias <span class="file">localhost</span> -destalias <span class="file">localhost</span>"_"$ENDDATE \
+  -storepass <span class="pwd">changeit</span> -srcstorepass <span class="pwd">changeit</span>
+keytool -import -trustcacerts -alias <span class="file">localhost</span> -file <span class="file">localhost</span>.crt \
+  -keystore <span class="file">localhost</span>.jceks -storetype JCEKS \
+  -storepass <span class="pwd">changeit</span> -noprompt
+echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre013')">Copy</button>
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Create P7B from DigiCert Signed Certificate</summary>
+<div class="code">
+<pre id="pre114">
+openssl crl2pkcs7 -nocrl \
+  -certfile <span class="file">localhost</span>.crt \
+  -certfile DigiCertCA.crt \
+  -out <span class="file">localhost</span>.p7b
+</pre>
+<button onclick="clipper('pre114')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create PFX from DigiCert Signed Certificate</summary>
+<div class="code">
+<pre id="pre014">
+openssl pkcs12 -export \
+  -out <span class="file">localhost</span>.pfx \
+  -inkey <span class="file">localhost</span>.key \
+  -in <span class="file">localhost</span>.crt \
+  -certfile DigiCertCA.crt \
+  -password pass:<span class="pwd">changeit</span>
+echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre014')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create Java KeyStore from DigiCert Signed Certificate</summary>
+<div class="code">
+<pre id="pre015">
+openssl pkcs12 -export \
+  -out <span class="file">localhost</span>.pfx \
+  -inkey <span class="file">localhost</span>.key \
+  -in <span class="file">localhost</span>.crt \
+  -certfile DigiCertCA.crt \
+  -name <span class="file">localhost</span> \
+  -password pass:<span class="pwd">changeit</span>
+keytool -importkeystore \
+  -srckeystore <span class="file">localhost</span>.pfx -srcstoretype pkcs12 \
+  -srcalias <span class="file">localhost</span> -srcstorepass <span class="pwd">changeit</span> \
+  -destkeystore <span class="file">localhost</span>.jks -deststoretype JKS \
+  -destalias <span class="file">localhost</span> -storepass <span class="pwd">changeit</span>
+keytool -import -trustcacerts -alias DigiCertCA -file DigiCertCA.crt \
+  -keystore <span class="file">localhost</span>.jks -storepass <span class="pwd">changeit</span> -noprompt
+echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre015')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Create enddate alias JCEKS from DigiCert Signed Certificate</summary>
+<div class="code">
+<pre id="pre016">
+ENDDATE=`date \
+  --date="$(openssl x509 -in <span class="file">localhost</span>.crt -enddate -noout | cut -d= -f 2)" \
+  --iso-8601`
+openssl pkcs12 -export \
+  -out <span class="file">localhost</span>.pfx \
+  -inkey <span class="file">localhost</span>.key \
+  -in <span class="file">localhost</span>.crt \
+  -certfile DigiCertCA.crt \
+  -name <span class="file">localhost</span> \
+  -password pass:<span class="pwd">changeit</span>
+keytool -importkeystore \
+  -srckeystore <span class="file">localhost</span>.pfx -srcstoretype pkcs12 \
+  -destkeystore <span class="file">localhost</span>.jceks -deststoretype JCEKS \
+  -alias <span class="file">localhost</span> -destalias <span class="file">localhost</span>"_"$ENDDATE \
+  -storepass <span class="pwd">changeit</span> -srcstorepass <span class="pwd">changeit</span>
+keytool -import -trustcacerts -alias DigiCertCA -file DigiCertCA.crt \
+  -keystore <span class="file">localhost</span>.jceks -storetype JCEKS \
+  -storepass <span class="pwd">changeit</span> -noprompt
+echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre016')">Copy</button>
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Convert <span class="file">localhost</span>.pfx to PEM</summary>
+<div class="code">
+<pre id="pre017">
+openssl pkcs12 \
+  -in <span class="file">localhost</span>.pfx \
+  -passin file:<span class="file">localhost</span>.pin \
+  -out <span class="file">localhost</span>.txt -nodes
+</pre>
+<button onclick="clipper('pre017')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Extract certifcate and key from <span class="file">localhost</span>.pfx</summary>
+<div class="code">
+<pre id="pre117">
+openssl pkcs12 \
+  -in <span class="file">localhost</span>.pfx \
+  -passin file:<span class="file">localhost</span>.pin \
+  -nocerts -nodes \
+  -out <span class="file">localhost</span>.key
+openssl pkcs12 \
+  -in <span class="file">localhost</span>.pfx \
+  -passin file:<span class="file">localhost</span>.pin \
+  -nokeys -clcerts \
+  -out <span class="file">localhost</span>.crt
+</pre>
+<button onclick="clipper('pre117')">Copy</button>
+</div>
+<div class="code">
+<pre id="pre217">
+openssl pkcs12 \
+  -in <span class="file">localhost</span>.pfx \
+  -passin file:<span class="file">localhost</span>.pin \
+  -nocerts -nodes \
+  | sed -ne '/-BEGIN PRIVATE KEY-/,/-END PRIVATE KEY-/p' > <span class="file">localhost</span>.key
+openssl pkcs12 \
+  -in <span class="file">localhost</span>.pfx \
+  -passin file:<span class="file">localhost</span>.pin \
+  -clcerts -nokeys \
+  | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > <span class="file">localhost</span>.crt
+</pre>
+<button onclick="clipper('pre217')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Dump <span class="file">localhost</span>.crt</summary>
+<div class="code">
+<pre id="pre018">
+openssl x509 -text -nout -in <span class="file">localhost</span>.crt
+</pre>
+<button onclick="clipper('pre018')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Convert <span class="file">localhost</span>.crt from DER to PEM</summary>
+&nbsp; &nbsp; Distinguished Encoding Rules (DER) to Privacy Enhanced Mail (PEM)
+<div class="code">
+<pre id="pre019">
+openssl x509 \
+  -inform DER -in <span class="file">localhost</span>.crt \
+  -outform PEM -out <span class="file">localhost</span>.pem
+</pre>
+<button onclick="clipper('pre019')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Convert <span class="file">localhost</span>.crt from PEM to DER</summary>
+&nbsp; &nbsp; Privacy Enhanced Mail (PEM) to Distinguished Encoding Rules (DER)
+<div class="code">
+<pre id="pre020">
+openssl x509 \
+  -inform PEM -in <span class="file">localhost</span>.crt \
+  -outform DER -out <span class="file">localhost</span>.der
+</pre>
+<button onclick="clipper('pre020')">Copy</button>
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Check <span class="file">localhost</span>.crt dates</summary>
+<div class="code">
+<pre id="pre021">
+openssl x509 -noout -dates -in <span class="file">localhost</span>.crt
+</pre>
+<button onclick="clipper('pre021')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Check https://<span class="cn">localhost</span> expiry date</summary>
+<div class="code">
+<pre id="pre022">
+echo | openssl s_client -connect <span class="cn">localhost</span>:443 \
+  2>/dev/null | openssl x509 -noout -subject -issuer -enddate
+</pre>
+<button onclick="clipper('pre022')">Copy</button>
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>Create root and signing certificate authority</summary>
+<div class="code">
+<pre id="pre906">
+openssl req -new -x509 -newkey rsa:2048 -sha256 -nodes -days 3652 \
+  -out rootca.crt \
+  -keyout rootca.key \
+  -subj "/CN=Root Certificate Authority" \
+  -extensions x509_ext \
+  -config <(cat \
+  <(printf "[ req ]\n") \
+  <(printf "distinguished_name=req\n") \
+  <(printf "[ x509_ext ]\n") \
+  <(printf "keyUsage=critical,digitalSignature,keyCertSign,cRLSign\n") \
+  <(printf "basicConstraints=critical,CA:true\n") \
+  <(printf "subjectKeyIdentifier=hash\n") \
+  <(printf "authorityKeyIdentifier=keyid:always,issuer\n") \
+  )
+
+openssl req -new -newkey rsa:2048 -nodes \
+  -out signca.csr \
+  -keyout signca.key \
+  -subj "/CN=Signing Certificate Authority"
+
+openssl x509 -req -sha256 -days 3652 \
+  -in signca.csr \
+  -out signca.crt \
+  -CA rootca.crt -CAkey rootca.key -CAcreateserial \
+  -extensions ext \
+  -extfile <(cat \
+  <(printf "[ ext ]\n") \
+  <(printf "basicConstraints=critical,CA:true,pathlen:0\n") \
+  <(printf "keyUsage=critical,digitalSignature,keyCertSign,cRLSign\n") \
+  <(printf "extendedKeyUsage=serverAuth,clientAuth\n") \
+  <(printf "subjectKeyIdentifier=hash\n") \
+  <(printf "authorityKeyIdentifier=keyid:always,issuer\n") \
+  )
+</pre>
+<button onclick="clipper('pre906')">Copy</button>
+</div>
+</details>
+
+<details>
+<summary>Sign with signing certificate authority</summary>
+<div class="code">
+<pre id="pre904">
+openssl x509 -req -sha256 -days 3652 \
+  -in <span class="file">localhost</span>.csr \
+  -CA signca.crt -CAkey signca.key -CAcreateserial \
+  -out <span class="file">localhost</span>.crt \
+  -extensions exts \
+  -extfile <(cat \
+  <(printf "[ exts ]\n") \
+  <(printf "subjectKeyIdentifier=hash\n") \
+  <(printf "authorityKeyIdentifier=keyid:always,issuer\n") \
+  <(printf "subjectAltName=<span class="san1">DNS:localhost,IP:127.0.0.1</span>\n") \
+  <(printf "basicConstraints=critical,CA:false\n") \
+  )
+</pre>
+<button onclick="clipper('pre904')">Copy</button>
+</div>
+</details>
+
+</div>
+
+<br><br>
+
+<script>
+
+function clipper(id) {
+  const copyText = document.getElementById(id).textContent;
+  const textArea = document.createElement('textarea');
+  textArea.textContent = copyText;
+  document.body.append(textArea);
+  textArea.select();
+  document.execCommand("copy");
+}
+
+function genpassword(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+window.addEventListener("load", function(){
+  var p = genpassword(8);
+  document.querySelectorAll('.pwd').forEach(el=>{ el.innerHTML = p || 'changeit'; })
+});
+
+document.getElementById('cn').onchange = function() {
+  var a = this.innerHTML.toLowerCase();
+  var f = this.innerHTML.toLowerCase().replace(/\./g,"_");
+  var s1 = "DNS:" + a;
+  var s2 = "DNS.1 = " + a + "\\n \\";
+  var s3 = "<(printf \"DNS.1=" + a + "\\n\") \\";
+  f = f.replace(/\*/g,"star");
+  if (a.includes("*.")) { s1 = s1 + ",DNS:" + a.replace(/\*\./,""); }
+  if (a.includes("*.")) { s2 = s2 + "\n  DNS.2 = " + a.replace(/\*\./,"") + "\\n \\"; }
+  if (a.includes("*.")) { s3 = s3 + "\n  <(printf \"DNS.2=" + a.replace(/\*\./,"") + "\\n\") \\"; }
+  if (a.includes("localhost")) { s1 = s1 + ",IP:127.0.0.1"; }
+  if (a.includes("localhost")) { s2 = s2 + "\n  IP.1 = 127.0.0.1" + "\\n \\"; }
+  if (a.includes("localhost")) { s3 = s3 + "\n  <(printf \"IP.1=127.0.0.1" + "\\n\") \\"; }
+  document.querySelectorAll('.cn').forEach(el=>{ el.innerHTML = a || 'localhost'; })
+  document.querySelectorAll('.file').forEach(el=>{ el.innerHTML = f || 'localhost'; })
+  document.querySelectorAll('.san1').forEach(el=>{ el.innerHTML = s1 || 'DNS:localhost'; })
+  document.querySelectorAll('.san2').forEach(el=>{ el.innerHTML = s2 || 'DNS.1 = localhost'; })
+  document.querySelectorAll('.san3').forEach(el=>{ el.innerHTML = s3 || 'DNS.1=localhost'; })
+}
+
+document.getElementById('c').onchange = function() {
+  this.innerHTML = this.innerHTML.toUpperCase();
+  var a = this.innerHTML;
+  document.querySelectorAll('.c').forEach(el=>{ el.innerHTML = a || 'AU'; })
+}
+
+document.getElementById('st').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.st').forEach(el=>{ el.innerHTML = a || 'Western Australia'; })
+}
+
+document.getElementById('o').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.o').forEach(el=>{ el.innerHTML = a || 'Organisation'; })
+}
+
+document.getElementById('l').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.l').forEach(el=>{ el.innerHTML = a || 'Location'; })
+}
+
+function editId(event) {
+    var span, input, text;
+
+    // Get the event (handle MS difference)
+    event = event || window.event;
+    // Get the root element of the event (handle MS difference)
+    span = event.target || event.srcElement;
+    // If it's a span...
+    if (span && span.tagName.toUpperCase() === "SPAN") {
+        // Hide it
+        span.style.display = "none";
+        // Get its text
+        text = span.innerHTML;
+        // Create an input
+        input = document.createElement("input");
+        input.type = "text";
+        input.value = text;
+        input.size = Math.max(text.length / 4 * 3, 16);
+        span.parentNode.insertBefore(input, span);
+        // Focus it, hook blur to undo
+        input.focus();
+	input.select();
+        input.onblur = function() {
+            // Remove the input
+            span.parentNode.removeChild(input);
+            // Update the span
+            span.innerHTML = input.value == "" ? "&nbsp;" : input.value;
+            // Show the span again
+            span.style.display = "";
+            span.dispatchEvent(new Event('change'));
+        }
+        input.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                input.blur();
+            }
+        });
+    }
+}
+
+document.getElementById('cn').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('c').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('st').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('l').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('o').onclick = function(event) {
+  editId(event);
+}
+
+</script>
+
+</body>
+</html>
