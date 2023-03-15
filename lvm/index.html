@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Logical Volume Manager Help Sheet">
+<meta name="keywords" content="LVM, Logical Volume Manager, Help Sheet">
+<meta name="author" content="Andrew Milne">
+
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>Logical Volume Manager</title>
+
+<style type="text/css">
+
+.inputdiv{
+   position: -webkit-sticky;
+   position: sticky;
+   top: 0;
+
+   margin: auto;
+   padding: 10px;
+   width: 600px;
+   text-align: center;
+   vertical-align: middle;
+   background-color: #FFFFFF;
+
+   font-family: Georgia;
+   font-size: 14px;
+   font-style: italic;
+   font-variant: normal;
+   font-weight: normal;
+
+   box-shadow: 5px 5px 2px #888888;
+   border: 1px solid #888888;
+
+   -moz-border-radius-bottomleft: 14px;
+   -webkit-border-bottom-left-radius: 14px;
+   border-bottom-left-radius: 14px;
+
+   -moz-border-radius-bottomright: 14px;
+   -webkit-border-bottom-right-radius: 14px;
+   border-bottom-right-radius: 14px;
+
+   -moz-border-radius-topright: 14px;
+   -webkit-border-top-right-radius: 14px;
+   border-top-right-radius: 14px;
+
+   -moz-border-radius-topleft: 14px;
+   -webkit-border-top-left-radius: 14px;
+   border-top-left-radius: 14px;
+}
+
+.outputdiv{
+   margin-left: 150px;
+   margin-right: 20px;
+   width: 900px;
+   padding: 10px;
+   text-align: left;
+   vertical-align: middle;
+   background-color: #FFFFFF;
+
+   box-shadow: 10px 10px 5px #888888;
+   border:1px solid #888888;
+
+   -moz-border-radius-bottomleft: 14px;
+   -webkit-border-bottom-left-radius: 14px;
+   border-bottom-left-radius: 14px;
+
+   -moz-border-radius-bottomright: 14px;
+   -webkit-border-bottom-right-radius: 14px;
+   border-bottom-right-radius: 14px;
+
+   -moz-border-radius-topright: 14px;
+   -webkit-border-top-right-radius: 14px;
+   border-top-right-radius: 14px;
+
+   -moz-border-radius-topleft: 14px;
+   -webkit-border-top-left-radius: 14px;
+   border-top-left-radius: 14px;
+}
+
+input{
+   margin-right: 30px;
+}
+
+summary{
+   cursor: pointer;
+   outline: none;
+   
+   text-align: left;
+   margin-left: 130px;
+   margin-top: 30px;
+   margin-bottom: 5px;
+   
+   font-family: Georgia, serif;
+   font-size: 16px;
+   font-style: normal;
+   font-variant: normal;
+   font-weight: normal;
+}
+
+pre{
+   font-family: "Courier New", Courier, monospace;
+   font-size: 12px;
+   font-style: normal;
+   font-variant: normal; 
+   font-weight: normal;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="inputdiv">
+/dev/<input id="dev" type="text" size="5" maxlength="8"  value="sdb" onClick="this.select();" />
+VG:  <input id="vg"  type="text" size="5" maxlength="16" value="rhel" onClick="this.select();" />
+LV:  <input id="lv"  type="text" size="5" maxlength="16" value="root" onClick="this.select();" />
+</div>
+
+<details>
+<summary>Rescan SCSI bus</summary>
+<div class="outputdiv">
+<pre>
+echo "- - -" > /sys/class/scsi_host/host0/scan
+</pre>
+</div>
+</details>
+
+<details>
+<summary>Partition the disk (DOS or GPT disk label) and mark partition as LVM using parted</summary>
+<div class="outputdiv">
+<pre>
+parted /dev/<span class="dev">sdb</span> mklabel msdos
+parted /dev/<span class="dev">sdb</span> mkpart primary 0% 100%
+parted /dev/<span class="dev">sdb</span> set 1 lvm on
+</pre>
+</div>
+<br>
+<div class="outputdiv">
+<pre>
+parted /dev/<span class="dev">sdb</span> mklabel gpt
+parted /dev/<span class="dev">sdb</span> mkpart lvm_1 0% 100%
+parted /dev/<span class="dev">sdb</span> set 1 lvm on
+</pre>
+</div>
+</details>
+
+<details>
+<summary>Partition the disk (DOS disk label) and mark partition as LVM using fdisk</summary>
+<div class="outputdiv">
+<pre>
+fdisk /dev/<span class="dev">sdb</span>
+</pre>
+</div>
+<br>
+<div class="outputdiv">
+<pre>
+Device contains neither a valid DOS partition table, nor Sun, SGI or OSF disklabel
+Building a new DOS disklabel with disk identifier 0x21cbd9bb.
+Changes will remain in memory only, until you decide to write them.
+After that, of course, the previous content won't be recoverable.
+
+Warning: invalid flag 0x0000 of partition table 4 will be corrected by w(rite)
+
+WARNING: DOS-compatible mode is deprecated. It's strongly recommended to
+         switch off the mode (command 'c') and change display units to
+         sectors (command 'u').
+
+Command (m for help): <b style="color:red">n</b>
+Command action
+   e   extended
+   p   primary partition (1-4)
+p
+Partition number (1-4): <b style="color:red">1</b>
+First cylinder (1-1044, default 1): 
+Using default value 1
+Last cylinder, +cylinders or +size{K,M,G} (1-1044, default 1044): 
+Using default value 1044
+
+Command (m for help): <b style="color:red">t</b>
+Selected partition 1
+Hex code (type L to list codes): <b style="color:red">8e</b>
+Changed system type of partition 1 to 8e (Linux LVM)
+
+Command (m for help): <b style="color:red">w</b>
+The partition table has been altered!
+
+Calling ioctl() to re-read partition table.
+Syncing disks.
+
+</pre>
+</div>
+</details>
+
+<details>
+<summary>Partition the disk (GPT disk label) and mark partition as LVM using gdisk</summary>
+<div class="outputdiv">
+<pre>
+yum -y install gdisk
+
+gdisk /dev/<span class="dev">sdb</span>
+</pre>
+</div>
+<br>
+<div class="outputdiv">
+<pre>
+GPT fdisk (gdisk) version 0.8.10
+
+Partition table scan:
+  MBR: not present
+  BSD: not present
+  APM: not present
+  GPT: not present
+
+Creating new GPT entries.
+
+Command (? for help): <b style="color:red">n</b>
+Partition number (1-128, default 1): 
+First sector (34-16777182, default = 2048) or {+-}size{KMGTP}: 
+Last sector (2048-16777182, default = 16777182) or {+-}size{KMGTP}: 
+Current type is 'Linux filesystem'
+Hex code or GUID (L to show codes, Enter = 8300): <b style="color:red">8e00</b>
+Changed type of partition to 'Linux LVM'
+
+Command (? for help): <b style="color:red">w</b>
+
+Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING
+PARTITIONS!!
+
+Do you want to proceed? (Y/N): <b style="color:red">y</b>
+OK; writing new GUID partition table (GPT) to /dev/<span class="dev">sdb</span>.
+The operation has completed successfully.
+</pre>
+</div>
+</details>
+
+<details>
+<summary>Extend the Volume Group with new disk and grow Logical Volume and File System to 100% of free space</summary>
+<div class="outputdiv">
+<pre>
+vgextend <span class="vg">rhel</span> /dev/<span class="dev">sdb</span><span class="part">1</span>
+lvextend -l+100%FREE -r /dev/<span class="vg">rhel</span>/<span class="lv">root</span>
+</pre>
+</div>
+</details>
+
+<details>
+<summary>Create new Volume Group and Logical Volume</summary>
+<div class="outputdiv">
+<pre>
+vgcreate <span class="vg">rhel</span> /dev/<span class="dev">sdb</span><span class="part">1</span>
+lvcreate -n <span class="lv">root</span> -l 100%FREE <span class="vg">rhel</span>
+</pre>
+</div>
+</details>
+
+<details>
+<summary>Create new EXT4 File System</summary>
+<div class="outputdiv">
+<pre>
+mkfs.ext4 -L <span class="lv">root</span> /dev/mapper/<span class="vg">rhel</span>-<span class="lv">root</span>
+
+echo "/dev/mapper/<span class="vg">rhel</span>-<span class="lv">root</span>  /<span class="lv">root</span>                   ext4   defaults        0 0" >> /etc/fstab
+</pre>
+</div>
+</details>
+
+<details>
+<summary>Create new XFS File System</summary>
+<div class="outputdiv">
+<pre>
+mkfs.xfs -L <span class="lv">root</span> /dev/mapper/<span class="vg">rhel</span>-<span class="lv">root</span>
+
+echo "/dev/mapper/<span class="vg">rhel</span>-<span class="lv">root</span>  /<span class="lv">root</span>                   xfs     defaults        0 0" >> /etc/fstab
+</pre>
+</div>
+</details>
+
+
+<script>
+document.getElementById('dev').onkeyup = function() {
+  var a = this.value;
+  document.querySelectorAll('.dev').forEach(el=>{ el.innerHTML = a || 'sdb'; })
+  if (a.includes("nvme")) { document.querySelectorAll('.part').forEach(el=>{ el.innerHTML = 'p1'; }) }
+  else { document.querySelectorAll('.part').forEach(el=>{ el.innerHTML = '1'; }) }
+}
+document.getElementById('vg').onkeyup = function() {
+  var a = this.value;
+  document.querySelectorAll('.vg').forEach(el=>{ el.innerHTML = a || 'rhel'; })
+}
+document.getElementById('lv').onkeyup = function() {
+  var a = this.value;
+  document.querySelectorAll('.lv').forEach(el=>{ el.innerHTML = a || 'root'; })
+}
+</script>
+
+</body>
+</html> 

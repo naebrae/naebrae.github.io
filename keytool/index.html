@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Java Keytool Help Sheet">
+<meta name="keywords" content="Java, Keytool, Help Sheet">
+<meta name="author" content="Andrew Milne">
+
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>Java Keytool Help Sheet</title>
+
+<style type="text/css">
+textarea {
+  position: absolute;
+  left: -100%;
+}
+
+button {
+  transition-duration: 0.4s;
+  background-color: white;
+  color: black;
+  border: 1px solid #4CAF50; /* Green */
+  border-radius: 8px;
+}
+button:active {
+  transform: translateY(6px);
+}
+button:hover {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+#cn,#o,#l,#c,#st,#test span {
+  font-style: italic;
+  font-weight: bold;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  outline: 1px dotted;
+  padding: 1px 3px;
+  color: #0f7000; /* Green */
+  cursor: pointer;
+}
+#using input {
+  font-style: normal;
+  font-weight: normal;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  outline: 1px dotted;
+  padding: 1px 3px;
+  border: 0px;
+}
+
+.output {
+  width: 60%;
+  margin: auto;
+}
+
+pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  background-color: #FFFFFF;
+}
+
+div.code {
+  position: relative;
+  overflow-x: auto;
+
+  margin: 20px auto;
+  width: 700px;
+  padding: 20px;
+  text-align: left;
+  vertical-align: middle;
+
+  box-shadow: 10px 10px 5px #888888;
+  border:1px solid #888888;
+
+  -moz-border-radius-bottomleft: 14px;
+  -webkit-border-bottom-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+
+  -moz-border-radius-bottomright: 14px;
+  -webkit-border-bottom-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+
+  -moz-border-radius-topright: 14px;
+  -webkit-border-top-right-radius: 14px;
+  border-top-right-radius: 14px;
+
+  -moz-border-radius-topleft: 14px;
+  -webkit-border-top-left-radius: 14px;
+  border-top-left-radius: 14px;
+
+}
+
+pre + button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="output">
+<br>
+
+<h3>Create Self-Signed Certificate with SAN
+<div class="code">
+<pre id="pre000">
+keytool -genkey -keyalg RSA -keysize 2048 -validity 3652 \
+  -keystore <span class="file">localhost</span>.jks \
+  -storetype JKS \
+  -storepass <span class="pwd">changeit</span> \
+  -keypass <span class="pwd">changeit</span> \
+  -alias <span class="file">localhost</span> \
+  -dname "C=<span id="c">AU</span>,ST=<span id="st">Western Australia</span>,L=<span id="l">Location</span>,O=<span id="o">Organisation</span>,CN=<span id="cn">localhost</span>" \
+  -ext KeyUsage=digitalSignature,dataEncipherment,keyEncipherment,keyAgreement \
+  -ext ExtendedKeyUsage=serverAuth,clientAuth \
+  -ext SubjectAlternativeName:c=<span class="san1">DNS:localhost,IP:127.0.0.1</span> \
+  && echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre000')">Copy</button>
+</div>
+
+<h3>Create Certificate Signing Request (CSR) from Self-Signed key pair
+<div class="code">
+<pre id="pre001">
+keytool -certreq \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -alias <span class="file">localhost</span> \
+  -file <span class="file">localhost</span>.csr
+</pre>
+<button onclick="clipper('pre001')">Copy</button>
+</div>
+
+<h3>Create Root Certificate Authority Certificate
+<div class="code">
+<pre id="pre004">
+keytool -v -genkeypair \
+  -dname "CN=Root Certificate Authority" \
+  -keystore rootca.jks \
+  -storepass secret -keypass secret \
+  -keyalg RSA -keysize 2048 \
+  -alias rootca -validity 3652 \
+  -ext KeyUsage=digitalSignature,keyCertSign \
+  -ext BasicConstraints=ca:true,PathLen:3
+</pre>
+<button onclick="clipper('pre004')">Copy</button>
+</div>
+
+<h3>Sign Certificate Signing Request with Root Certificate Authority</h3>
+<div class="code">
+<pre id="pre005">
+keytool -v -gencert \
+  -infile <span class="file">localhost</span>.csr \
+  -outfile <span class="file">localhost</span>.crt \
+  -keystore rootca.jks \
+  -storepass secret \
+  -alias rootca \
+  -validity 3652 \
+  -ext KeyUsage=digitalSignature,dataEncipherment,keyEncipherment,keyAgreement \
+  -ext ExtendedKeyUsage=serverAuth,clientAuth
+</pre>
+<button onclick="clipper('pre005')">Copy</button>
+</div>
+
+<h3>Create CA and server certificate (from Keytool documentation)</h3>
+<div class="code">
+<pre id="pre006">
+
+keytool -genkeypair -keystore root.jks -alias root -ext bc:c \
+ -storepass changeit -dname "CN=Root Certificate Authority"
+
+keytool -genkeypair -keystore ca.jks -alias ca -ext bc:c \
+ -storepass changeit -dname "CN=Certificate Authority"
+
+keytool -genkeypair -keystore server.jks -alias server \
+ -storepass changeit -dname "CN=server"
+
+keytool -keystore root.jks -alias root -exportcert -storepass changeit -rfc > root.pem
+
+keytool -keystore ca.jks -alias ca -certreq -storepass changeit | \
+ keytool -keystore root.jks -alias root -gencert -ext bc=0 -storepass changeit -rfc > ca.pem
+
+cat root.pem ca.pem > cachain.pem
+
+keytool -keystore ca.jks -importcert -alias ca -storepass changeit -file cachain.pem -noprompt
+
+keytool -storepass changeit -keystore server.jks -certreq -alias server | \
+keytool -storepass changeit -keystore ca.jks -gencert -alias ca \
+-ext ku:c=dig,keyEncipherment -rfc > server.pem
+
+cat root.pem ca.pem server.pem > serverchain.pem
+
+keytool -keystore server.jks -importcert -alias server \
+  -storepass changeit -file serverchain.pem -noprompt
+
+</pre>
+<button onclick="clipper('pre006')">Copy</button>
+</div>
+
+<h3>Add root certificate to keystore</h3>
+<div class="code">
+<pre id="pre007">
+keytool -import -trustcacerts -noprompt \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -file rootca.crt
+</pre>
+<button onclick="clipper('pre007')">Copy</button>
+</div>
+
+<h3>Add signing certificate to keystore</h3>
+<div class="code">
+<pre id="pre008">
+keytool -import -trustcacerts -noprompt \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -file signca.crt
+</pre>
+<button onclick="clipper('pre008')">Copy</button>
+</div>
+
+<h3>Add externally signed certificate to keystore</h3>
+<div class="code">
+<pre id="pre009">
+keytool -import -noprompt \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -alias <span class="file">localhost</span> \
+  -file <span class="file">localhost</span>.crt
+</pre>
+<button onclick="clipper('pre009')">Copy</button>
+</div>
+
+<h3>List certificates in keystore</h3>
+<div class="code">
+<pre id="pre010">
+keytool -list -v \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre010')">Copy</button>
+</div>
+
+<h3>Export certificate in binary format (DER) from keystore</h3>
+<div class="code">
+<pre id="pre011">
+keytool -export \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -alias <span class="file">localhost</span> \
+  -file <span class="file">localhost</span>.crt
+</pre>
+<button onclick="clipper('pre011')">Copy</button>
+</div>
+
+<h3>Convert Java Keystore to PKCS12 format certificate store to export private key</h3>
+<div class="code">
+<pre id="pre013">
+keytool -importkeystore \
+  -srckeystore <span class="file">localhost</span>.jks \
+  -srcstorepass:file <span class="file">localhost</span>.pin \
+  -srcalias <span class="file">localhost</span> \
+  -destkeystore <span class="file">localhost</span>.p12 \
+  -deststorepass:file <span class="file">localhost</span>.pin \
+  -deststoretype PKCS12
+</pre>
+<button onclick="clipper('pre013')">Copy</button>
+</div>
+
+<h3>Export private key from PKCS12 file</h3>
+<div class="code">
+<pre id="pre014">
+openssl pkcs12 -nodes -nocerts \
+  -in <span class="file">localhost</span>.p12 \
+  -password file:<span class="file">localhost</span>.pin \
+  -out <span class="file">localhost</span>.key
+</pre>
+<button onclick="clipper('pre014')">Copy</button>
+</div>
+
+<h3>Export certificate from PKCS12 file</h3>
+<div class="code">
+<pre id="pre015">
+openssl pkcs12 -nokeys \
+  -in <span class="file">localhost</span>.p12 \
+  -password file:<span class="file">localhost</span>.pin \
+  -out <span class="file">localhost</span>.crt
+</pre>
+<button onclick="clipper('pre015')">Copy</button>
+</div>
+
+<br>
+
+<h3>Create Java Cryptography Extension Key Store (JCEKS) from Java Key Store (JKS)</h3>
+<div class="code">
+<pre id="pre019">
+
+KEYSTORE_UNTIL=$(keytool -list -v \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -alias <span class="file">localhost</span> | grep -i Until  | sed 's/.*until: //')
+ENDDATE=$(date +%Y-%m-%d --date="$KEYSTORE_UNTIL")
+
+keytool -importkeystore \
+  -srckeystore <span class="file">localhost</span>.jks -srcstoretype JKS \
+  -destkeystore <span class="file">localhost</span>.jceks -deststoretype JCEKS \
+  -alias <span class="file">localhost</span> -destalias <span class="file">localhost</span>"_"$ENDDATE \
+  -storepass:file <span class="file">localhost</span>.pin -srcstorepass:file <span class="file">localhost</span>.pin
+
+keytool -list -keystore <span class="file">localhost</span>.jceks -storetype JCEKS \
+  -storepass:file <span class="file">localhost</span>.pin
+
+</pre>
+<button onclick="clipper('pre019')">Copy</button>
+</div>
+
+<h3>Add expiration date to certificate alias</h3>
+<div class="code">
+<pre id="pre020">
+
+KEYSTORE_UNTIL=$(keytool -list -v \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -alias <span class="file">localhost</span> | grep -i Until  | sed 's/.*until: //')
+ENDDATE=$(date +%Y-%m-%d --date="$KEYSTORE_UNTIL")
+
+keytool -changealias \
+  -alias <span class="file">localhost</span> \
+  -destalias <span class="file">localhost</span>"_"$ENDDATE \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin
+
+keytool -list -keystore <span class="file">localhost</span>.jks -storetype JKS \
+  -storepass:file <span class="file">localhost</span>.pin
+
+</pre>
+<button onclick="clipper('pre020')">Copy</button>
+</div>
+
+<h3>Change private key password</h3>
+<div class="code">
+<pre id="pre021">
+keytool -keypasswd \
+  -new changeit \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -keypass <span class="pwd">changeit</span> \
+  -alias <span class="file">localhost</span>
+</pre>
+<button onclick="clipper('pre021')">Copy</button>
+</div>
+
+<h3>Change keystore password</h3>
+<div class="code">
+<pre id="pre022">
+keytool -storepasswd \
+  -new changeit \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  && echo "changeit" > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre022')">Copy</button>
+</div>
+
+<h3>Change alias</h3>
+<div class="code">
+<pre id="pre023">
+keytool -changealias \
+  -alias <span class="file">localhost</span> \
+  -destalias server \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre023')">Copy</button>
+</div>
+
+<br><br>
+
+</div>
+
+<br><br>
+
+<script>
+
+function clipper(id) {
+  const copyText = document.getElementById(id).textContent;
+  const textArea = document.createElement('textarea');
+  textArea.textContent = copyText;
+  document.body.append(textArea);
+  textArea.select();
+  document.execCommand("copy");
+}
+
+function genpassword(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+window.addEventListener("load", function(){
+  var p = genpassword(8);
+  document.querySelectorAll('.pwd').forEach(el=>{ el.innerHTML = p || 'changeit'; })
+});
+
+document.getElementById('cn').onchange = function() {
+  var a = this.innerHTML.toLowerCase();
+  var f = this.innerHTML.toLowerCase().replace(/\./g,"_");
+  var s1 = "DNS:" + a;
+  f = f.replace(/\*/g,"star");
+  if (a.includes("*.")) { s1 = s1 + ",DNS:" + a.replace(/\*\./,""); }
+  if (a.includes("localhost")) { s1 = s1 + ",IP:127.0.0.1"; }
+  document.querySelectorAll('.cn').forEach(el=>{ el.innerHTML = a || 'localhost'; })
+  document.querySelectorAll('.file').forEach(el=>{ el.innerHTML = f || 'localhost'; })
+  document.querySelectorAll('.san1').forEach(el=>{ el.innerHTML = s1 || 'DNS:localhost'; })
+}
+
+function editId(event) {
+    var span, input, text;
+    
+    // Get the event (handle MS difference)
+    event = event || window.event;
+    // Get the root element of the event (handle MS difference)
+    span = event.target || event.srcElement;
+    // If it's a span...
+    if (span && span.tagName.toUpperCase() === "SPAN") {
+        // Hide it
+        span.style.display = "none";
+        // Get its text
+        text = span.innerHTML;
+        // Create an input
+        input = document.createElement("input");
+        input.type = "text";
+        input.value = text;
+        input.size = Math.max(text.length, 16);
+        span.parentNode.insertBefore(input, span);
+        // Focus it, hook blur to undo
+        input.focus();
+        input.onblur = function() {
+            // Remove the input
+            span.parentNode.removeChild(input);
+            // Update the span
+            span.innerHTML = input.value == "" ? "&nbsp;" : input.value;
+            // Show the span again
+            span.style.display = "";
+            span.dispatchEvent(new Event('change'));
+        }
+        input.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                input.blur();
+            }
+        });
+    }
+}
+
+document.getElementById('cn').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('c').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('st').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('l').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('o').onclick = function(event) {
+  editId(event);
+}
+
+</script>
+
+</body>
+</html>
