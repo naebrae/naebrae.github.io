@@ -447,6 +447,7 @@ function editId(event) {
         span.parentNode.insertBefore(input, span);
         // Focus it, hook blur to undo
         input.focus();
+        input.select();
         input.onblur = function() {
             // Remove the input
             span.parentNode.removeChild(input);
