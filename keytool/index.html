@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="Java Keytool Help Sheet">
-<meta name="keywords" content="Java, Keytool, Help Sheet">
+<meta name="keywords" content="HTML, CSS, JavaScript, Java, Keytool">
 <meta name="author" content="Andrew Milne">
 
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
@@ -109,7 +109,8 @@ pre + button {
 <div class="output">
 <br>
 
-<h3>Create Self-Signed Certificate with SAN
+<h3>Create Self-Signed Certificate with SAN, RSA keys</h3>
+Note: CSR, if required, will be created from this certificate
 <div class="code">
 <pre id="pre000">
 keytool -genkey -keyalg RSA -keysize 2048 -validity 3652 \
@@ -127,7 +128,44 @@ keytool -genkey -keyalg RSA -keysize 2048 -validity 3652 \
 <button onclick="clipper('pre000')">Copy</button>
 </div>
 
-<h3>Create Certificate Signing Request (CSR) from Self-Signed key pair
+<h3>Create Self-Signed Certificate with SAN, ECC keys (deprecated)</h3>
+<div class="code">
+<pre id="pre100">
+keytool -genkey -keyalg EC -keysize 256 -validity 3652 \
+  -keystore <span class="file">localhost</span>.jks \
+  -storetype JKS \
+  -storepass <span class="pwd">changeit</span> \
+  -keypass <span class="pwd">changeit</span> \
+  -alias <span class="file">localhost</span> \
+  -dname "C=<span class="c">AU</span>,ST=<span class="st">Western Australia</span>,L=<span class="l">Location</span>,O=<span class="o">Organisation</span>,CN=<span class="cn">localhost</span>" \
+  -ext KeyUsage=digitalSignature,dataEncipherment,keyEncipherment,keyAgreement \
+  -ext ExtendedKeyUsage=serverAuth,clientAuth \
+  -ext SubjectAlternativeName:c=<span class="san1">DNS:localhost,IP:127.0.0.1</span> \
+  && echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre100')">Copy</button>
+</div>
+
+<h3>Create Self-Signed Certificate with SAN, ECC keys</h3>
+groupname can be: secp256r1, secp384r1, or secp521r1.<br>Signature Alogrithm (sigalg) defaults to SHA384withECDSA if the groupname is secp384r1.
+<div class="code">
+<pre id="pre200">
+keytool -genkey -keyalg EC -groupname secp384r1 -sigalg SHA256withECDSA -validity 3652 \
+  -keystore <span class="file">localhost</span>.jks \
+  -storetype JKS \
+  -storepass <span class="pwd">changeit</span> \
+  -keypass <span class="pwd">changeit</span> \
+  -alias <span class="file">localhost</span> \
+  -dname "C=<span class="c">AU</span>,ST=<span class="st">Western Australia</span>,L=<span class="l">Location</span>,O=<span class="o">Organisation</span>,CN=<span class="cn">localhost</span>" \
+  -ext KeyUsage=digitalSignature,dataEncipherment,keyEncipherment,keyAgreement \
+  -ext ExtendedKeyUsage=serverAuth,clientAuth \
+  -ext SubjectAlternativeName:c=<span class="san1">DNS:localhost,IP:127.0.0.1</span> \
+  && echo <span class="pwd">changeit</span> > <span class="file">localhost</span>.pin
+</pre>
+<button onclick="clipper('pre200')">Copy</button>
+</div>
+
+<h3>Create Certificate Signing Request (CSR) from Self-Signed key pair</h3>
 <div class="code">
 <pre id="pre001">
 keytool -certreq \
@@ -139,7 +177,7 @@ keytool -certreq \
 <button onclick="clipper('pre001')">Copy</button>
 </div>
 
-<h3>Create Root Certificate Authority Certificate
+<h3>Create Root Certificate Authority Certificate</h3>
 <div class="code">
 <pre id="pre004">
 keytool -v -genkeypair \
@@ -259,6 +297,18 @@ keytool -export \
   -file <span class="file">localhost</span>.crt
 </pre>
 <button onclick="clipper('pre011')">Copy</button>
+</div>
+
+<h3>Export certificate in text format (PEM) from keystore</h3>
+<div class="code">
+<pre id="pre111">
+keytool -export -rfc \
+  -keystore <span class="file">localhost</span>.jks \
+  -storepass:file <span class="file">localhost</span>.pin \
+  -alias <span class="file">localhost</span> \
+  -file <span class="file">localhost</span>.pem
+</pre>
+<button onclick="clipper('pre111')">Copy</button>
 </div>
 
 <h3>Convert Java Keystore to PKCS12 format certificate store to export private key</h3>
@@ -424,6 +474,27 @@ document.getElementById('cn').onchange = function() {
   document.querySelectorAll('.cn').forEach(el=>{ el.innerHTML = a || 'localhost'; })
   document.querySelectorAll('.file').forEach(el=>{ el.innerHTML = f || 'localhost'; })
   document.querySelectorAll('.san1').forEach(el=>{ el.innerHTML = s1 || 'DNS:localhost'; })
+}
+
+document.getElementById('c').onchange = function() {
+  this.innerHTML = this.innerHTML.toUpperCase();
+  var a = this.innerHTML;
+  document.querySelectorAll('.c').forEach(el=>{ el.innerHTML = a || 'AU'; })
+}
+
+document.getElementById('st').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.st').forEach(el=>{ el.innerHTML = a || 'Western Australia'; })
+}
+
+document.getElementById('o').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.o').forEach(el=>{ el.innerHTML = a || 'Organisation'; })
+}
+
+document.getElementById('l').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.l').forEach(el=>{ el.innerHTML = a || 'Location'; })
 }
 
 function editId(event) {
