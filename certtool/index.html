@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="GNUTLS certtool Help Sheet">
+<meta name="keywords" content="gnutls, certtool">
+<meta name="author" content="Andrew Milne">
+
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>CertTool Help Sheet</title>
+
+<style type="text/css">
+
+textarea {
+  position: absolute;
+  left: -100%;
+}
+
+button {
+  transition-duration: 0.4s;
+  background-color: white;
+  color: black;
+  border: 1px solid #4CAF50; /* Green */
+  border-radius: 8px;
+}
+
+button:active {
+  transform: translateY(6px);
+}
+
+button:hover {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+#cn,#o,#ou,#l,#c,#st,#tplt,#end span {
+  font-style: italic;
+  font-weight: bold;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  outline: 1px dotted;
+  padding: 1px 3px;
+  color: #0f7000; /* Green */
+  cursor: pointer;
+}
+
+.output {
+  width: 60%;
+  margin: auto;
+}
+
+pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  background-color: #FFFFFF;
+}
+
+div.code {
+  position: relative;
+  overflow-x: auto;
+
+  margin: 20px auto;
+  width: 700px;
+  padding: 20px;
+  text-align: left;
+  vertical-align: middle;
+
+  box-shadow: 10px 10px 5px #888888;
+  border:1px solid #888888;
+
+  -moz-border-radius-bottomleft: 14px;
+  -webkit-border-bottom-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+
+  -moz-border-radius-bottomright: 14px;
+  -webkit-border-bottom-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+
+  -moz-border-radius-topright: 14px;
+  -webkit-border-top-right-radius: 14px;
+  border-top-right-radius: 14px;
+
+  -moz-border-radius-topleft: 14px;
+  -webkit-border-top-left-radius: 14px;
+  border-top-left-radius: 14px;
+}
+
+pre + button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.sticky_input {
+  position: -webkit-sticky;
+  position: sticky;
+  z-index: 999;
+  top: 20px;
+  background-color: #F8F8F8;
+  overflow-x: auto;
+
+  margin: auto;
+  width: 700px;
+  height: 30px;
+  padding: 20px;
+  text-align: center;
+  vertical-align: middle;
+
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+
+  border:1px solid #888888;
+
+  -moz-border-radius-bottomleft: 14px;
+  -webkit-border-bottom-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+
+  -moz-border-radius-bottomright: 14px;
+  -webkit-border-bottom-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+
+  -moz-border-radius-topright: 14px;
+  -webkit-border-top-right-radius: 14px;
+  border-top-right-radius: 14px;
+
+  -moz-border-radius-topleft: 14px;
+  -webkit-border-top-left-radius: 14px;
+  border-top-left-radius: 14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sticky_input">
+c=<span id="c">AU</span>, st=<span id="st">Western Australia</span>, l=<span id="l">Perth</span>, o=<span id="o">Organisation</span>, ou=<span id="ou">Unit</span>, cn=<span id="cn">localhost</span>
+</div>
+
+
+<div class="output">
+<br>
+
+<h3>Create Certificate Signing Request (CSR), RSA keys</h3>
+<div class="code">
+<pre id="pre101">
+certtool --generate-privkey --no-text --key-type rsa --bits 2048 \
+--outfile <span class="file">localhost</span>.key
+
+certtool --generate-request \
+--load-privkey <span class="file">localhost</span>.key \
+--outfile <span class="file">localhost</span>.csr \
+--template <(cat &lt;&lt;EOF
+
+dn = "c=<span class="c">AU</span>,st=<span class="st">Western Australia</span>,l=<span class="l">Perth</span>,o=<span class="o">Organisation</span>,ou=<span class="ou">Unit</span>,cn=<span class="cn">localhost</span>"
+
+EOF
+)
+</pre>
+<button onclick="clipper('pre101')">Copy</button>
+</div>
+
+
+<h3>Create Certificate Signing Request (CSR) with SAN and Windows template, ECC keys</h3>
+<div class="code">
+<pre id="pre300">
+certtool --generate-privkey --no-text --key-type ecdsa --curve secp256r1 \
+--outfile <span class="file">localhost</span>.key
+
+template="<span id="tplt">WebServer</span>"
+certtool --generate-request --no-text \
+--load-privkey <span class="file">localhost</span>.key \
+--outfile <span class="file">localhost</span>.csr \
+--template <(cat \
+<(printf "country = <span class="c">AU</span>\n") \
+<(printf "state = '<span class="st">Western Australia</span>'\n") \
+<(printf "locality = '<span class="l">Perth</span>'\n") \
+<(printf "organization = '<span class="o">Organisation</span>'\n") \
+<(printf "unit = '<span class="ou">Unit</span>'\n") \
+<(printf "cn = '<span class="cn">localhost</span>'\n") \
+<(printf "<span class="san1">dns_name = localhost\nip_address = 127.0.0.1\n</span>") \
+<(printf "add_extension = '1.3.6.1.4.1.311.20.2 0x1E") \
+<(printf %02X $((${#template}*2))) \
+<(for ((i=0;i<${#template};i++)); do printf 00%02X \'${template:$i:1}; done) \
+)
+</pre>
+<button onclick="clipper('pre300')">Copy</button>
+</div>
+
+
+<h3>Create Self-Signed Certificate with SAN, RSA keys</h3>
+<div class="code">
+<pre id="pre100">
+certtool --generate-privkey --no-text --key-type rsa --bits 2048 \
+--outfile <span class="file">localhost</span>.key
+
+certtool --generate-self-signed \
+--load-privkey <span class="file">localhost</span>.key \
+--outfile <span class="file">localhost</span>.crt \
+--template <(cat &lt;&lt;EOF
+
+dn = "c=<span class="c">AU</span>,st=<span class="st">Western Australia</span>,l=<span class="l">Perth</span>,o=<span class="o">Organisation</span>,ou=<span class="ou">Unit</span>,cn=<span class="cn">localhost</span>"
+
+<span class="san2">dns_name = localhost
+ip_address = 127.0.0.1</span>
+
+activation_date = "2020-01-01 00:00:00 UTC"
+expiration_date = "2050-12-31 23:59:59 UTC"
+
+signing_key
+cert_signing_key
+crl_signing_key
+ca
+
+EOF
+)
+</pre>
+<button onclick="clipper('pre100')">Copy</button>
+</div>
+
+
+<h3>Create Self-Signed Certificate with SAN, ECC keys</h3>
+<div class="code">
+<pre id="pre200">
+certtool --generate-privkey --no-text --key-type ecdsa --curve secp256r1 \
+--outfile <span class="file">localhost</span>.key
+
+certtool --generate-self-signed \
+--load-privkey <span class="file">localhost</span>.key \
+--outfile <span class="file">localhost</span>.crt \
+--template <(cat &lt;&lt;EOF
+
+country = <span class="c">AU</span>
+state = <span class="st">Western Australia</span>
+locality = <span class="l">Perth</span>
+organization = <span class="o">Organisation</span>
+unit = <span class="ou">Unit</span>
+common name = <span class="cn">localhost</span>
+
+<span class="san2">dns_name = localhost
+ip_address = 127.0.0.1</span>
+
+expiration_days = 7304
+
+signing_key
+cert_signing_key
+crl_signing_key
+ca
+
+EOF
+)
+</pre>
+<button onclick="clipper('pre200')">Copy</button>
+</div>
+
+
+<h3>Create Root Certificate Authority Certificate</h3>
+<div class="code">
+<pre id="pre400">
+certtool --generate-privkey --no-text --outfile root.key --key-type ecdsa --curve secp384r1
+
+certtool --generate-self-signed --load-privkey root.key --outfile root.crt \
+--template <(cat &lt;&lt;EOF
+dn = "cn = Organisation Root, ou = www.lab.home, o = Organisation, c = AU"
+activation_date = "2020-01-01 00:00:00 UTC"
+expiration_date = "2050-12-31 23:59:59 UTC"
+signing_key
+cert_signing_key
+crl_signing_key
+ca
+EOF
+)
+</pre>
+<button onclick="clipper('pre400')">Copy</button>
+</div>
+
+<h3>Sign Certificate Signing Request with Root Certificate Authority</h3>
+<div class="code">
+<pre id="pre500">
+certtool --generate-privkey --no-text --outfile ca.key --key-type ecdsa --curve secp384r1
+
+certtool --generate-request --no-text --load-privkey ca.key --outfile ca.csr \
+--template <(cat &lt;&lt;EOF
+country = AU
+organization = "Organisation"
+unit = "www.lab.home"
+cn = "Home CA"
+EOF
+)
+
+certtool --generate-certificate --load-request ca.csr --outfile ca.crt \
+--load-ca-certificate root.crt --load-ca-privkey root.key \
+--template <(cat &lt;&lt;EOF
+expiration_days = 7304
+ca
+path_len = 0
+signing_key
+cert_signing_key
+crl_signing_key
+tls_www_client
+tls_www_server
+EOF
+)
+</pre>
+<button onclick="clipper('pre500')">Copy</button>
+</div>
+
+<h3>Create CSR and Sign with CA certificate</h3>
+<div class="code">
+<pre id="pre600">
+certtool --generate-privkey --outfile <span class="file">localhost</span>.key --key-type ecdsa --curve secp384r1
+
+certtool --generate-certificate \
+--load-privkey <span class="file">localhost</span>.key --outfile <span class="file">localhost</span>.crt \
+--load-ca-certificate ca.crt --load-ca-privkey ca.key \
+--template <(cat &lt;&lt;EOF
+
+country = <span class="c">AU</span>
+state = <span class="st">Western Australia</span>
+locality = <span class="l">Perth</span>
+organization = <span class="o">Organisation</span>
+unit = <span class="ou">Unit</span>
+cn = <span class="cn">localhost</span>
+
+<span class="san2">dns_name = localhost
+ip_address = 127.0.0.1
+ip_address = ::1
+</span>
+
+expiration_days = 365
+
+encryption_key
+data_encipherment
+tls_www_client
+tls_www_server
+EOF
+)
+</pre>
+<button onclick="clipper('pre600')">Copy</button>
+</div>
+
+<h3>Create P12 from certificate</h3>
+<div class="code">
+<pre id="pre700">
+certtool --load-ca-certificate ca.crt --p12-name <span class="file">localhost</span> --password changeit \
+--load-certificate <span class="file">localhost</span>.crt --load-privkey <span class="file">localhost</span>.key \
+--to-p12 --outder --outfile <span class="file">localhost</span>.p12
+</pre>
+<button onclick="clipper('pre700')">Copy</button>
+</div>
+
+
+<script>
+function clipper(id) {
+  const copyText = document.getElementById(id).textContent;
+  const textArea = document.createElement('textarea');
+  textArea.textContent = copyText;
+  document.body.append(textArea);
+  textArea.select();
+  document.execCommand("copy");
+}
+
+function genpassword(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+window.addEventListener("load", function(){
+  var p = genpassword(8);
+  document.querySelectorAll('.pwd').forEach(el=>{ el.innerHTML = p || 'changeit'; })
+});
+
+document.getElementById('cn').onchange = function() {
+  var a = this.innerHTML.toLowerCase();
+  var f = this.innerHTML.toLowerCase().replace(/\./g,"_");
+  var s1 = "dns_name = " + a;
+  var s2 = "dns_name = " + a;
+  f = f.replace(/\*/g,"star");
+  if (a.includes("*.")) { s1 = s1 + "\\ndns_name = " + a.replace(/\*\./,"") + "\\n"; }
+  if (a.includes("*.")) { s2 = s2 + "\ndns_name = " + a.replace(/\*\./,""); }
+  if (a.includes("localhost")) { s1 = s1 + "\\nip_address = 127.0.0.1\\n"; }
+  if (a.includes("localhost")) { s2 = s2 + "\nip_address = 127.0.0.1"; }
+  document.querySelectorAll('.cn').forEach(el=>{ el.innerHTML = a || 'localhost'; })
+  document.querySelectorAll('.file').forEach(el=>{ el.innerHTML = f || 'localhost'; })
+  document.querySelectorAll('.san1').forEach(el=>{ el.innerHTML = s1 || 'dns_name = localhost'; })
+  document.querySelectorAll('.san2').forEach(el=>{ el.innerHTML = s2 || 'dns_name = localhost'; })
+}
+
+document.getElementById('c').onchange = function() {
+  this.innerHTML = this.innerHTML.toUpperCase();
+  var a = this.innerHTML;
+  document.querySelectorAll('.c').forEach(el=>{ el.innerHTML = a || 'AU'; })
+}
+
+document.getElementById('st').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.st').forEach(el=>{ el.innerHTML = a || 'Western Australia'; })
+}
+
+document.getElementById('o').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.o').forEach(el=>{ el.innerHTML = a || 'Organisation'; })
+}
+
+document.getElementById('ou').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.ou').forEach(el=>{ el.innerHTML = a || 'Org Unit'; })
+}
+
+document.getElementById('l').onchange = function() {
+  var a = this.innerHTML;
+  document.querySelectorAll('.l').forEach(el=>{ el.innerHTML = a || 'Location'; })
+}
+
+function editId(event) {
+    var span, input, text;
+    
+    // Get the event (handle MS difference)
+    event = event || window.event;
+    // Get the root element of the event (handle MS difference)
+    span = event.target || event.srcElement;
+    // If it's a span...
+    if (span && span.tagName.toUpperCase() === "SPAN") {
+        // Hide it
+        span.style.display = "none";
+        // Get its text
+        text = span.innerHTML;
+        // Create an input
+        input = document.createElement("input");
+        input.type = "text";
+        input.value = text;
+        input.size = text.length;
+        span.parentNode.insertBefore(input, span);
+        // Focus it, hook blur to undo
+        input.focus();
+        input.select();
+        input.onblur = function() {
+            // Remove the input
+            span.parentNode.removeChild(input);
+            // Update the span
+            span.innerHTML = input.value == "" ? "&nbsp;" : input.value;
+            // Show the span again
+            span.style.display = "";
+            span.dispatchEvent(new Event('change'));
+        }
+        input.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                input.blur();
+            }
+        });
+    }
+}
+
+document.getElementById('cn').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('c').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('st').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('l').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('o').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('ou').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('tplt').onclick = function(event) {
+  editId(event);
+}
+
+</script>
+
+</body>
+</html>
