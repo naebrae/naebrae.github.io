@@ -42,7 +42,7 @@ button:hover {
   cursor: pointer;
 }
 
-#cn,#o,#l,#st,#c,#test span {
+#cn,#o,#l,#st,#c,#tmpl,#test span {
   font-style: italic;
   font-weight: bold;
   font-family: "Courier New", Courier, monospace;
@@ -52,7 +52,7 @@ button:hover {
   color: #0f7000; /* Green */
   cursor: pointer;
 }
-#cn,#o,#l,#st,#c,#test input {
+#cn,#o,#l,#st,#c,#tmpl,#test input {
   font-style: normal;
   font-weight: normal;
   font-family: "Courier New", Courier, monospace;
@@ -112,8 +112,9 @@ div.code {
 div.code_sticky {
    position: -webkit-sticky;
    position: sticky;
-   top: 0;
+   top: 10px;
    overflow-x: auto;
+   z-index: 999;
    background-color: white;
 
    margin-left: 20px;
@@ -218,7 +219,7 @@ openssl req -newkey rsa:2048 -nodes \
   <(printf "[ req ]\n") \
   <(printf "distinguished_name=req\n") \
   <(printf "[ req_ext ]\n") \
-  <(printf "certificateTemplate=ASN1:BMP:SHA2-SSL-WebRequest\n") \
+  <(printf "certificateTemplate=ASN1:BMP:<span id="tmpl">WebServer</span>\n") \
   <(printf "subjectAltName=@alt_name\n") \
   <(printf "[ alt_name ]\n") \
   <span class="san3"><(printf "DNS.1=localhost\n") \<br>  <(printf "IP.1=127.0.0.1\n") \</span>
@@ -925,11 +926,11 @@ function editId(event) {
         input = document.createElement("input");
         input.type = "text";
         input.value = text;
-        input.size = Math.max(text.length / 4 * 3, 16);
+        input.size = text.length;
         span.parentNode.insertBefore(input, span);
         // Focus it, hook blur to undo
         input.focus();
-	input.select();
+        input.select();
         input.onblur = function() {
             // Remove the input
             span.parentNode.removeChild(input);
@@ -964,6 +965,10 @@ document.getElementById('l').onclick = function(event) {
 }
 
 document.getElementById('o').onclick = function(event) {
+  editId(event);
+}
+
+document.getElementById('tmpl').onclick = function(event) {
   editId(event);
 }
 
